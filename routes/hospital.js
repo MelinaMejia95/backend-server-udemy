@@ -6,7 +6,7 @@ var mdAutenticacion = require('../middlewares/autenticacion');
 
 var app = express();
 
-var Hospital = require('../models/hostpital');
+var Hospital = require('../models/hospital');
 
 //Obtener todos los hospitales
 app.get('/', (req, res, next) => {
