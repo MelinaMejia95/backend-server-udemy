@@ -1,6 +1,4 @@
 var express = require('express');
-var bcrypt = require('bcryptjs');
-var jwt = require('jsonwebtoken');
 
 var mdAutenticacion = require('../middlewares/autenticacion');
 
@@ -11,20 +9,30 @@ var Hospital = require('../models/hospital');
 //Obtener todos los hospitales
 app.get('/', (req, res, next) => {
 
-    Hospital.find({},'nombre img usuario')
-            .exec(
-            (err, hospitales) => {
-                if (err) {
-                    return  res.status(500).json({
-                        ok: false,
-                        mensaje: 'Error cargando hospitales',
-                        errors: err
-                    });
-                }
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    Hospital.find({})
+        .skip(desde)
+        .limit(5)
+        .populate('usuario', 'nombre email')
+        .exec(
+        (err, hospitales) => {
+            if (err) {
+                return  res.status(500).json({
+                    ok: false,
+                    mensaje: 'Error cargando hospitales',
+                    errors: err
+                });
+            }
+
+            Hospital.count({}, (err, conteo) => {
                 res.status(200).json({
                     ok: true,
-                    hospitales: hospitales
+                    hospitales: hospitales,
+                    total: conteo
                 });
+            });     
     });
   
 });
@@ -48,12 +56,12 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
             return res.status(400).json({
                 ok: false,
                 mensaje: 'El hospital con el id ' + id + ' no existe',
-                errors: { mensaje: 'No existe un hospital con ese id' }
+                errors: { mensaje: 'No existe un hospital con ese ID' }
             }); 
         }
 
         hospital.nombre = body.nombre;
-        hospital.usuario = body.usuario;
+        hospital.usuario = req.usuario._id;
 
         hospital.save( (err, hospitalGuardado) => {
             if ( err ) {
@@ -79,7 +87,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var body = req.body;
     var hospital = new Hospital({
         nombre: body.nombre,
-        usuario: body.usuario
+        usuario: req.usuario._id
     }); 
     
     hospital.save( (err, hospitalGuardado) => {
@@ -94,7 +102,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         res.status(200).json({
             ok: true,
             hospital: hospitalGuardado,
-            usuarioToken: req.usuario 
         });
     });
 

@@ -1,5 +1,4 @@
 var express = require('express');
-var jwt = require('jsonwebtoken');
 
 var mdAutenticacion = require('../middlewares/autenticacion');
 
@@ -10,7 +9,14 @@ var Medico = require('../models/medico');
 //Obtener todos los médicos
 app.get('/', (req, res) => {
 
-    Medico.find({}, 'nombre usuario hospital')
+    var desde = req.query.desde || 0;
+    desde = Number(desde);
+
+    Medico.find({})
+        .skip(desde)
+        .limit(5)
+        .populate('usuario', 'nombre email')
+        .populate('hospital')
         .exec(
             (err, medicos) => {
                 if(err) {
@@ -21,9 +27,12 @@ app.get('/', (req, res) => {
                     });
                 }
 
-                res.status(200).json({
-                    ok: true, 
-                    medico: medicos
+                Medico.count({}, (err, conteo) => {
+                    res.status(200).json({
+                        ok: true, 
+                        medico: medicos,
+                        total: conteo
+                    });
                 });
         });
 
@@ -53,7 +62,7 @@ app.put('/:id', mdAutenticacion.verificaToken, (req, res) => {
         }
 
         medico.nombre = body.nombre;
-        medico.usuario = body.usuario;
+        medico.usuario = req.usuario._id;
         medico.hospital = body.hospital;
 
         medico.save( (err, medicoGuardado) => {
@@ -81,7 +90,7 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
     var body = req.body;
     var medico = new Medico({
         nombre: body.nombre,
-        usuario: body.usuario,
+        usuario: req.usuario._id,
         hospital: body.hospital,
         img: body.img
     });
@@ -98,7 +107,6 @@ app.post('/', mdAutenticacion.verificaToken, (req, res) => {
         res.status(200).json({
             ok: true,
             medico: medicoGuardado,
-            usuarioToken: req.usuario
         }); 
     });
 
