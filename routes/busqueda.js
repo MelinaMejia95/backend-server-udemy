@@ -65,6 +65,7 @@ app.get('/todo/:busqueda', (req, res, next) => {
 
 });
 
+//Buscar hospitales
 function buscarHospitales( busqueda, regex ) {
 
     return new Promise( (resolve, reject) => {
@@ -81,6 +82,7 @@ function buscarHospitales( busqueda, regex ) {
 
 }
 
+//Buscar médicos
 function buscarMedicos( busqueda, regex ) {
 
     return new Promise( (resolve, reject) => {
@@ -98,6 +100,7 @@ function buscarMedicos( busqueda, regex ) {
 
 }
 
+//Buscar usuario
 function buscarUsuario( busqueda, regex ) {
 
     return new Promise( (resolve, reject) => {
