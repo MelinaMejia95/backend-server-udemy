@@ -40,7 +40,7 @@ app.put('/:tipo/:id', (req, res, next) => {
     var extension = nombreCortado[ nombreCortado.length -1 ];
 
     //Extensiones válidas
-    var extensionesValidas = ['png', 'jpg', 'gif', 'jpeg'];
+    var extensionesValidas = ['png', 'jpg', 'gif', 'jpeg', 'Png'];
 
     if( extensionesValidas.indexOf(extension) < 0 ) {
         return  res.status(400).json({
