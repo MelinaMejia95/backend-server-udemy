@@ -13,6 +13,20 @@ var CLIENT_ID = require('../config/config').CLIENT_ID;
 const {OAuth2Client} = require('google-auth-library');
 const client = new OAuth2Client(CLIENT_ID);
 
+var mdAutenticacion = require('../middlewares/autenticacion');
+
+//Renovar token
+app.get('/renovartoken', mdAutenticacion.verificaToken, (req, res) => {
+
+    var token = jwt.sign({ usuario: req.usuario }, SEED, { expiresIn: 14400 }); //Expira en 4 horas
+
+    res.status(200).json({
+        ok: true,
+        token: token
+    });
+
+});
+
 //Autenticación Google
 async function verify(token) {
     const ticket = await client.verifyIdToken({
@@ -174,6 +188,5 @@ function obtenerMenu (ROLE) {
     return menu;
 
 }
-
 
 module.exports = app;
